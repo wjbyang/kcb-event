@@ -1,12 +1,13 @@
 from django.db import models
 import uuid
 
-# Create your models here.
+# KCB
 class Organization(models.Model):
 	guid = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False, unique=True)
 	name = models.CharField(max_length=100)
 	image = models.TextField()
 
+# YA1, YA2, etc
 class Group(models.Model):
 	guid = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False, unique=True)
 	name = models.CharField(max_length=100)
@@ -22,6 +23,11 @@ class Event(models.Model):
 	modified = models.DateTimeField()
 	deleted = models.BooleanField(default=False)
 
+class GroupToEvent(models.Model):
+	group = models.ForeignKey(Group, on_delete=models.PROTECT)
+	event = models.ForeignKey(Event, on_delete=models.PROTECT)
+	hosting = models.BooleanField(default=False)
+
 class User(models.Model):
 	guid = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False, unique=True)
 	firstName = models.CharField(max_length=50)
@@ -29,14 +35,11 @@ class User(models.Model):
 	email = models.EmailField()
 	image = models.TextField()
 	deleted = models.BooleanField(default=False)
-	organization = models.ForeignKey(Organization, on_delete=models.PROTECT)
+	isAdmin = models.BooleanField(default=False)
+	organization = models.ForeignKey(Organization, blank=True, null=True, on_delete=models.PROTECT)
 
 class UserToEvent(models.Model):
 	user = models.ForeignKey(User, on_delete=models.PROTECT)
 	event = models.ForeignKey(Event, on_delete=models.PROTECT)
 	attending = models.BooleanField(default=False)
 
-
-# class UserInGroup(models.Model):
-# 	user = models.ForeignKey(User, on_delete=models.PROTECT)
-# 	group = models.ForeignKey(Group, on_delete=models.PROTECT)
