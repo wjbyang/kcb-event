@@ -21,12 +21,11 @@ class eventSchedulerTests(TestCase):
         # test that creating a user returns status code 200
         first_name=''.join(random.choices(string.ascii_uppercase + string.digits, k=5))
         last_name=''.join(random.choices(string.ascii_uppercase + string.digits, k=5))
-        org_name=''.join(random.choices(string.ascii_uppercase + string.digits, k=5))
-        org_id = str(Organization(name=org_name).guid)
+        org_id = '510243db-faf6-4672-a0c5-7e636f1e7eaa'
         user_data = {
             'first_name': first_name,
             'last_name': last_name,
             'organization_id': org_id
         }
-        response = self.client.post('http://127.0.0.1:8000/eventScheduler/v1/createUser/', json.dumps(user_data), content_type='application/json')
+        response = self.client.post('http://127.0.0.1:8000/eventScheduler/v1/create_user/', json.dumps(user_data), content_type='application/json')
         self.assertEqual(response.status_code, 200)

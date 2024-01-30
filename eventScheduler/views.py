@@ -48,12 +48,19 @@ class CreateUser(APIView):
 		first_name=request.get('first_name')
 		last_name=request.get('last_name')
 		organization_id=request.get('organization_id')
-		organization = Organization.get(guid=organization_id)
-		if organization:
-			newUser = User(first_name = first_name, last_name = last_name, organization=organization)
-			newUser.save()
-			return Response(result = [newUser])
-		return HttpResponse("id of organization was not found", status=404)
+		try:
+			organization = Organization.objects.get(guid=organization_id)
+		except:
+			return HttpResponse("id of organization was not found", status=404, content_type='text/plain')
+		new_user = User(first_name = first_name, last_name = last_name, organization=organization)
+		new_user.save()
+		user_data = {
+			# serialize model into json format before sending it back.
+            'guid': new_user.guid,
+            'first_name': new_user.first_name,
+            'last_name': new_user.last_name
+        }
+		return Response(user_data)
 
 class ViewUser(APIView):
 	def get(self, request, *args, **kwargs):
