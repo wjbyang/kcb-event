@@ -1,0 +1,10 @@
+curl -X POST http://127.0.0.1:8000/eventScheduler/v1/createUser/ \
+    -H "Content-Type: application/json" \
+    -d '{
+        "firstName": "table",
+        "lastName": "tennis",
+        "organization": "510243db-faf6-4672-a0c5-7e636f1e7eaa"
+    }'
+
+
+curl http://127.0.0.1:8000/eventScheduler/v1/organizations/

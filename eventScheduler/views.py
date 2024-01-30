@@ -42,15 +42,18 @@ class GroupView(APIView):
 		return Response(data, content_type="application/json")
 
 
-class UserView(APIView):
+class CreateUser(APIView):
 	def post(self, request, *args, **kwargs):
 		request = request.data
 		firstName=request.get('first_name')
 		lastName=request.get('last_name')
-		organization=request.get('organization')
-		newUser = User(firstName = firstName, lastName = lastName, organization=organization)
-		newUser.save()
-		return Response(result = [newUser])
+		organization_id=request.get('organization_id')
+		organization = Organization.get(guid=organization_id)
+		if organization:
+			newUser = User(firstName = firstName, lastName = lastName, organization=organization)
+			newUser.save()
+			return Response(result = [newUser])
+		return HttpResponse("id of organization was not found", status=404)
 
 class ViewUser(APIView):
 	def get(self, request, *args, **kwargs):
