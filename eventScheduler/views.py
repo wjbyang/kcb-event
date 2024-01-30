@@ -45,12 +45,12 @@ class GroupView(APIView):
 class CreateUser(APIView):
 	def post(self, request, *args, **kwargs):
 		request = request.data
-		firstName=request.get('first_name')
-		lastName=request.get('last_name')
+		first_name=request.get('first_name')
+		last_name=request.get('last_name')
 		organization_id=request.get('organization_id')
 		organization = Organization.get(guid=organization_id)
 		if organization:
-			newUser = User(firstName = firstName, lastName = lastName, organization=organization)
+			newUser = User(first_name = first_name, last_name = last_name, organization=organization)
 			newUser.save()
 			return Response(result = [newUser])
 		return HttpResponse("id of organization was not found", status=404)
@@ -58,7 +58,7 @@ class CreateUser(APIView):
 class ViewUser(APIView):
 	def get(self, request, *args, **kwargs):
 		user = User.objects.get(guid=self.kwargs['user_id'])
-		data = serialize("json", [user], fields=('firstName', 'lastName', 'organization'))
+		data = serialize("json", [user], fields=('first_name', 'last_name', 'organization'))
 		return HttpResponse(data, content_type="application/json")
 
 class ViewUsers(APIView):

@@ -18,7 +18,7 @@ class Event(models.Model):
 	location = models.CharField(max_length=50)
 	description = models.TextField()
 	image = models.TextField()
-	startTime = models.DateTimeField()
+	start_time = models.DateTimeField()
 	created = models.DateTimeField(editable=False)
 	modified = models.DateTimeField()
 	deleted = models.BooleanField(default=False)
@@ -30,8 +30,8 @@ class GroupToEvent(models.Model):
 
 class User(models.Model):
 	guid = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False, unique=True)
-	firstName = models.CharField(max_length=50)
-	lastName = models.CharField(max_length=50)
+	first_name = models.CharField(max_length=50)
+	last_name = models.CharField(max_length=50)
 	email = models.EmailField()
 	image = models.TextField()
 	deleted = models.BooleanField(default=False)

@@ -19,13 +19,13 @@ class eventSchedulerTests(TestCase):
 
     def test_create_user(self):
         # test that creating a user returns status code 200
-        firstName=''.join(random.choices(string.ascii_uppercase + string.digits, k=5))
-        lastName=''.join(random.choices(string.ascii_uppercase + string.digits, k=5))
-        orgName=''.join(random.choices(string.ascii_uppercase + string.digits, k=5))
-        org_id = str(Organization(name=orgName).guid)
+        first_name=''.join(random.choices(string.ascii_uppercase + string.digits, k=5))
+        last_name=''.join(random.choices(string.ascii_uppercase + string.digits, k=5))
+        org_name=''.join(random.choices(string.ascii_uppercase + string.digits, k=5))
+        org_id = str(Organization(name=org_name).guid)
         user_data = {
-            'firstName': firstName,
-            'lastName': lastName,
+            'first_name': first_name,
+            'last_name': last_name,
             'organization_id': org_id
         }
         response = self.client.post('http://127.0.0.1:8000/eventScheduler/v1/createUser/', json.dumps(user_data), content_type='application/json')
