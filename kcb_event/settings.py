@@ -49,6 +49,7 @@ MIDDLEWARE = [
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
+    'eventScheduler.middlewares.incorrect_url_middleware.IncorrectUrlMiddleware'
 ]
 
 ROOT_URLCONF = 'kcb_event.urls'

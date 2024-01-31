@@ -1,4 +1,4 @@
-from django.http import HttpResponse
+from django.http import HttpResponse, HttpResponseNotFound
 from django.core.serializers import serialize
 from rest_framework.views import APIView
 from rest_framework.response import Response
@@ -50,7 +50,7 @@ class GroupView(APIView):
 class UserView(APIView):
 	def post(self, request, *args, **kwargs):
 		request_data = request.data
-		required_fields = ['first_name', 'last_name', 'organization_id']
+		required_fields = ['first_name', 'last_name', 'email', 'organization_id']
 		missing_or_falsy_fields = [field for field in required_fields if not request_data.get(field)]
 		if missing_or_falsy_fields:
 			if len(missing_or_falsy_fields) == 1:
@@ -79,4 +79,3 @@ class ViewUsers(APIView):
 		users = User.objects.all()
 		data = UserSerializer(users, many=True).data
 		return Response(data, content_type="application/json")
-

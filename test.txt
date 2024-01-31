@@ -10,3 +10,5 @@ curl -X POST http://127.0.0.1:8000/eventScheduler/v1/create_user/ \
 curl http://127.0.0.1:8000/eventScheduler/v1/organizations/
 
 curl http://127.0.0.1:8000/eventScheduler/v1/users/
+
+curl http://127.0.0.1:8000/eventScheduler/v1/usersp/
