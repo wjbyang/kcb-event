@@ -2,25 +2,26 @@ from django.http import HttpResponse
 from django.core.serializers import serialize
 from rest_framework.views import APIView
 from rest_framework.response import Response
-from eventScheduler.models import User, Organization, Group
-from rest_framework import serializers
+from rest_framework import status
+from .models.models import *
+from .serializers import *
+from .services import *
 
 def index(request):
-    return HttpResponse("Hello, world")
+	return HttpResponse("Hello, world")
 
 class OrganizationView(APIView):
 	def post(self, request, *args, **kwargs):
 		request = request.data
 		name = request.get('name')
-		newOrg = Organization(name=name)
-		newOrg.save()
-		return Response(newOrg.guid)
+		new_organization = Organization(name=name)
+		new_organization.save()
+		data = OrganizationSerializer(new_organization).data
+		return Response(data, content_type="application/json")
 
 class GetOrganization(APIView):
 	def get(self, request, *args, **kwargs):
-		orgs = Organization.objects.all()
-		data = OrganizationSerializer(orgs, many=True).data
-		return Response(data, content_type="application/json")
+		return get_organization_data(kwargs['organization_id'])
 
 class GetOrganizations(APIView):
 	def get(self, request, *args, **kwargs):
@@ -47,31 +48,25 @@ class GroupView(APIView):
 		return Response(data, content_type="application/json")
 
 class UserView(APIView):
-    def post(self, request, *args, **kwargs):
-        request_data = request.data
-        first_name = request_data.get('first_name')
-        last_name = request_data.get('last_name')
-        organization_id = request_data.get('organization_id')
-        
-        organization = self.get_organization(organization_id)
-        if not organization:
-            return HttpResponse("organization not found", status=404, content_type='text/plain')
-        
-        new_user = User(first_name=first_name, last_name=last_name, organization=organization)
-        new_user.save()
-        
-        user_data = {
-            'guid': new_user.guid,
-            'first_name': new_user.first_name,
-            'last_name': new_user.last_name
-        }
-        return Response(user_data)
-
-    def check_if_organization_exists(self, organization_id):
-        try:
-            return Organization.objects.get(guid=organization_id)
-        except Organization.DoesNotExist:
-            return None
+	def post(self, request, *args, **kwargs):
+		request_data = request.data
+		required_fields = ['first_name', 'last_name', 'organization_id']
+		missing_or_falsy_fields = [field for field in required_fields if not request_data.get(field)]
+		if missing_or_falsy_fields:
+			if len(missing_or_falsy_fields) == 1:
+				error_message = f"{missing_or_falsy_fields[0]} is missing or empty."
+			else:
+				error_message = f"The following fields are missing or empty: {', '.join(missing_or_falsy_fields)}."
+			return Response({'error': error_message}, status=status.HTTP_400_BAD_REQUEST)
+		first_name = request_data.get('first_name')
+		last_name = request_data.get('last_name')
+		organization_id = request_data.get('organization_id')
+		# if get_organization_data raises an exception, it will propagate up and terminate the post request
+		organization = get_organization_data(organization_id)
+		new_user = User(first_name=first_name, last_name=last_name, organization=organization)
+		new_user.save()
+		data = UserSerializer(new_user).data
+		return Response(data)
 
 class ViewUser(APIView):
 	def get(self, request, *args, **kwargs):
@@ -85,17 +80,3 @@ class ViewUsers(APIView):
 		data = UserSerializer(users, many=True).data
 		return Response(data, content_type="application/json")
 
-class OrganizationSerializer(serializers.ModelSerializer):
-	class Meta:
-		model = Organization
-		fields = ['guid', 'name', 'image']
-
-class GroupSerializer(serializers.ModelSerializer):
-	class Meta:
-		model = Group
-		fields = '__all__'
-
-class UserSerializer(serializers.ModelSerializer):
-	class Meta:
-		model = User
-		fields = '__all__'
