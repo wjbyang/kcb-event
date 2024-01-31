@@ -60,10 +60,11 @@ class UserView(APIView):
 			return Response({'error': error_message}, status=status.HTTP_400_BAD_REQUEST)
 		first_name = request_data.get('first_name')
 		last_name = request_data.get('last_name')
+		email = request_data.get('email')
 		organization_id = request_data.get('organization_id')
 		# if get_organization_data raises an exception, it will propagate up and terminate the post request
 		organization = get_organization_data(organization_id)
-		new_user = User(first_name=first_name, last_name=last_name, organization=organization)
+		new_user = User(first_name=first_name, last_name=last_name, email=email, organization=organization)
 		new_user.save()
 		data = UserSerializer(new_user).data
 		return Response(data)
