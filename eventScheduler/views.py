@@ -43,24 +43,31 @@ class GroupView(APIView):
 
 
 class CreateUser(APIView):
-	def post(self, request, *args, **kwargs):
-		request = request.data
-		first_name=request.get('first_name')
-		last_name=request.get('last_name')
-		organization_id=request.get('organization_id')
-		try:
-			organization = Organization.objects.get(guid=organization_id)
-		except:
-			return HttpResponse("id of organization was not found", status=404, content_type='text/plain')
-		new_user = User(first_name = first_name, last_name = last_name, organization=organization)
-		new_user.save()
-		user_data = {
-			# serialize model into json format before sending it back.
+    def post(self, request, *args, **kwargs):
+        request_data = request.data
+        first_name = request_data.get('first_name')
+        last_name = request_data.get('last_name')
+        organization_id = request_data.get('organization_id')
+        
+        organization = self.get_organization(organization_id)
+        if not organization:
+            return HttpResponse("organization not found", status=404, content_type='text/plain')
+        
+        new_user = User(first_name=first_name, last_name=last_name, organization=organization)
+        new_user.save()
+        
+        user_data = {
             'guid': new_user.guid,
             'first_name': new_user.first_name,
             'last_name': new_user.last_name
         }
-		return Response(user_data)
+        return Response(user_data)
+
+    def get_organization(self, organization_id):
+        try:
+            return Organization.objects.get(guid=organization_id)
+        except Organization.DoesNotExist:
+            return None
 
 class ViewUser(APIView):
 	def get(self, request, *args, **kwargs):

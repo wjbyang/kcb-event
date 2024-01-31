@@ -78,10 +78,7 @@ WSGI_APPLICATION = 'kcb_event.wsgi.application'
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': BASE_DIR / 'db.sqlite3',
-        'TEST': {
-            'NAME': BASE_DIR / 'db.sqlite3',  # use main database for testing (dirty solution for now)
-        },
+        'NAME': BASE_DIR / 'db.sqlite3'
     }
 }
 
