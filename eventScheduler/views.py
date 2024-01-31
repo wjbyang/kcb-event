@@ -5,7 +5,6 @@ from rest_framework.response import Response
 from eventScheduler.models import User, Organization, Group
 from rest_framework import serializers
 
-
 def index(request):
     return HttpResponse("Hello, world")
 
@@ -18,6 +17,12 @@ class OrganizationView(APIView):
 		return Response(newOrg.guid)
 
 class GetOrganization(APIView):
+	def get(self, request, *args, **kwargs):
+		orgs = Organization.objects.all()
+		data = OrganizationSerializer(orgs, many=True).data
+		return Response(data, content_type="application/json")
+
+class GetOrganizations(APIView):
 	def get(self, request, *args, **kwargs):
 		orgs = Organization.objects.all()
 		data = OrganizationSerializer(orgs, many=True).data
@@ -41,8 +46,7 @@ class GroupView(APIView):
 		data = GroupSerializer(newGroup).data
 		return Response(data, content_type="application/json")
 
-
-class CreateUser(APIView):
+class UserView(APIView):
     def post(self, request, *args, **kwargs):
         request_data = request.data
         first_name = request_data.get('first_name')
@@ -63,7 +67,7 @@ class CreateUser(APIView):
         }
         return Response(user_data)
 
-    def get_organization(self, organization_id):
+    def check_if_organization_exists(self, organization_id):
         try:
             return Organization.objects.get(guid=organization_id)
         except Organization.DoesNotExist:
@@ -80,7 +84,6 @@ class ViewUsers(APIView):
 		users = User.objects.all()
 		data = UserSerializer(users, many=True).data
 		return Response(data, content_type="application/json")
-
 
 class OrganizationSerializer(serializers.ModelSerializer):
 	class Meta:
