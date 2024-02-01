@@ -7,7 +7,7 @@ class UserSerializer(serializers.ModelSerializer):
 	organization = serializers.PrimaryKeyRelatedField(read_only=True)
 	class Meta:
 		model = User
-		fields = '__all__'
+		fields = ['guid', 'first_name', 'last_name', 'email', 'image', 'organization']
 
 class OrganizationSerializer(serializers.ModelSerializer):
 	class Meta:
@@ -17,7 +17,7 @@ class OrganizationSerializer(serializers.ModelSerializer):
 class GroupSerializer(serializers.ModelSerializer):
 	class Meta:
 		model = Group
-		fields = '__all__'
+		fields = ['guid', 'name']
 
 class EventSerializer(serializers.ModelSerializer):
 	class Meta:

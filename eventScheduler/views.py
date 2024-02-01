@@ -20,17 +20,17 @@ class OrganizationView(APIView):
 		data = OrganizationSerializer(new_organization).data
 		return Response(data, content_type="application/json")
 
-class GetOrganization(APIView):
+class ViewOrganization(APIView):
 	def get(self, request, *args, **kwargs):
 		return get_organization_data(kwargs['organization_id'])
 
-class GetOrganizations(APIView):
+class ViewOrganizations(APIView):
 	def get(self, request, *args, **kwargs):
 		orgs = Organization.objects.all()
 		data = OrganizationSerializer(orgs, many=True).data
 		return Response(data, content_type="application/json")
 
-class GetGroups(APIView):
+class ViewGroups(APIView):
 	def get(self, request, *args, **kwargs):
 		orgs = Group.objects.all()
 		data = GroupSerializer(orgs, many=True).data

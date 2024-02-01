@@ -17,7 +17,7 @@ class UserViewTest(APITestCase):
         }
 
     @patch('eventScheduler.views.get_organization_data')
-    @patch('eventScheduler.serializers.UserSerializer')
+    @patch('eventScheduler.views.UserSerializer')
     def test_post_user_success(self, mock_serializer, mock_get_organization):
         mock_organization = Organization(name='random-name')
         mock_organization.save() # without this, the built-in database integrity test will fail since user's foreign key of organization does not exist in organization table
@@ -27,7 +27,6 @@ class UserViewTest(APITestCase):
         mock_get_organization.return_value = mock_organization
 
         response = self.client.post(self.post_url, self.valid_data, format='json')
-        print('response data is ', response.data)
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(response.data, mock_user_data)
     
@@ -43,8 +42,8 @@ class EventViewTest(APITestCase):
             'start_time': timezone.now()
         }
 
-    @patch('eventScheduler.utility.check_if_fields_are_missing')
-    @patch('eventScheduler.serializers.EventSerializer')
+    @patch('eventScheduler.views.check_if_fields_are_missing')
+    @patch('eventScheduler.views.EventSerializer')
     def test_post_event_success(self, mock_serializer, mock_check_if_fields_are_missing):
         mock_check_if_fields_are_missing.return_value = None
         mock_event_data = self.valid_data.copy()
@@ -52,5 +51,6 @@ class EventViewTest(APITestCase):
         mock_serializer_instance.data = mock_event_data
 
         response = self.client.post(self.post_url, self.valid_data, format='json')
+        print(response.content)
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(response.data, mock_event_data)
