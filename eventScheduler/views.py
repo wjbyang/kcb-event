@@ -88,7 +88,7 @@ class EventView(APIView):
 		start_time = request.data.get('start_time')
 		new_event = Event(name=name, location=location, description=description, image=image, start_time=start_time)
 		new_event.save()
-		data = UserSerializer(new_event).data
+		data = EventSerializer(new_event).data
 		return Response(data)
 
 class ViewEvent(APIView):

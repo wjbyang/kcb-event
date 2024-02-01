@@ -5,7 +5,7 @@ import uuid
 class Organization(models.Model):
 	guid = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False, unique=True)
 	name = models.CharField(max_length=100)
-	image = models.TextField()
+	image = models.TextField(null=True, blank=True)
 
 # YA1, YA2, etc
 class Group(models.Model):
@@ -17,7 +17,7 @@ class User(models.Model):
 	first_name = models.CharField(max_length=50)
 	last_name = models.CharField(max_length=50)
 	email = models.EmailField()
-	image = models.TextField()
+	image = models.TextField(null=True, blank=True)
 	deleted = models.BooleanField(default=False)
 	isAdmin = models.BooleanField(default=False)
 	organization = models.ForeignKey(Organization, blank=True, null=True, on_delete=models.PROTECT)
@@ -27,8 +27,8 @@ class Event(models.Model):
 	name = models.TextField()
 	location = models.CharField(max_length=50)
 	description = models.TextField()
-	image = models.TextField()
+	image = models.TextField(null=True, blank=True)
 	start_time = models.DateTimeField()
-	created = models.DateTimeField(editable=False)
-	modified = models.DateTimeField()
+	created = models.DateTimeField(auto_now_add=True, editable=False)
+	modified = models.DateTimeField(null=True, blank=True)
 	deleted = models.BooleanField(default=False)

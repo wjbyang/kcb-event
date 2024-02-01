@@ -51,6 +51,5 @@ class EventViewTest(APITestCase):
         mock_serializer_instance.data = mock_event_data
 
         response = self.client.post(self.post_url, self.valid_data, format='json')
-        print(response.content)
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(response.data, mock_event_data)
