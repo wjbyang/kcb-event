@@ -11,4 +11,7 @@ urlpatterns = [
     path('v1/organization/getall/', views.GetOrganization.as_view(), name='organization_get_all'),
     path('v1/group/post/', views.GroupView.as_view(), name='group_post'),
     path('v1/group/getall/', views.GetGroups.as_view(), name='group_get_all'),
+    path('v1/event/post/', views.GetGroups.as_view(), name='event_post'),
+    path('v1/event/get/<str:event_id>/', views.GetGroups.as_view(), name='event_get'),
+    path('v1/event/getall/', views.GetGroups.as_view(), name='event_get_all'),
 ]

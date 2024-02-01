@@ -18,3 +18,8 @@ class GroupSerializer(serializers.ModelSerializer):
 	class Meta:
 		model = Group
 		fields = '__all__'
+
+class EventSerializer(serializers.ModelSerializer):
+	class Meta:
+		model = Event
+		fields = ['guid', 'name', 'location', 'description', 'image', 'start_time']

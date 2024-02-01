@@ -1,4 +1,4 @@
-from django.http import HttpResponse, HttpResponseNotFound
+from django.http import HttpResponse
 from django.core.serializers import serialize
 from rest_framework.views import APIView
 from rest_framework.response import Response
@@ -6,6 +6,7 @@ from rest_framework import status
 from .models.models import *
 from .serializers import *
 from .services import *
+from .utility import *
 
 def index(request):
 	return HttpResponse("Hello, world")
@@ -51,13 +52,7 @@ class UserView(APIView):
 	def post(self, request, *args, **kwargs):
 		request_data = request.data
 		required_fields = ['first_name', 'last_name', 'email', 'organization_id']
-		missing_or_falsy_fields = [field for field in required_fields if not request_data.get(field)]
-		if missing_or_falsy_fields:
-			if len(missing_or_falsy_fields) == 1:
-				error_message = f"{missing_or_falsy_fields[0]} is missing or empty."
-			else:
-				error_message = f"The following fields are missing or empty: {', '.join(missing_or_falsy_fields)}."
-			return Response({'error': error_message}, status=status.HTTP_400_BAD_REQUEST)
+		check_if_fields_are_missing(request_data,required_fields)
 		first_name = request_data.get('first_name')
 		last_name = request_data.get('last_name')
 		email = request_data.get('email')
@@ -79,4 +74,31 @@ class ViewUsers(APIView):
 	def get(self, request, *args, **kwargs):
 		users = User.objects.all()
 		data = UserSerializer(users, many=True).data
+		return Response(data, content_type="application/json")
+
+class EventView(APIView):
+	def post(self, request, *args, **kwargs):
+		request_data = request.data
+		required_fields = ['name', 'location', 'description', 'start_time']
+		check_if_fields_are_missing(request_data,required_fields)
+		name = request_data.get('name')
+		location = request_data.get('location')
+		description = request_data.get('description')
+		image = request_data.get('image')
+		start_time = request.data.get('start_time')
+		new_event = Event(name=name, location=location, description=description, image=image, start_time=start_time)
+		new_event.save()
+		data = UserSerializer(new_event).data
+		return Response(data)
+
+class ViewEvent(APIView):
+	def get(self, request, *args, **kwargs):
+		event = User.objects.get(guid=self.kwargs['event_id'])
+		data = EventSerializer(event).data
+		return HttpResponse(data, content_type="application/json")
+
+class ViewEvents(APIView):
+	def get(self, request, *args, **kwargs):
+		events = Event.objects.all()
+		data = EventSerializer(events, many=True).data
 		return Response(data, content_type="application/json")
