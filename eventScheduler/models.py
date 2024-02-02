@@ -32,3 +32,15 @@ class Event(models.Model):
 	created = models.DateTimeField(auto_now_add=True, editable=False)
 	modified = models.DateTimeField(null=True, blank=True)
 	deleted = models.BooleanField(default=False)
+
+# relational models
+	
+class UserToEvent(models.Model):
+	user = models.ForeignKey(User, on_delete=models.PROTECT)
+	event = models.ForeignKey(Event, on_delete=models.PROTECT)
+	attending = models.BooleanField(default=False)
+
+class GroupToEvent(models.Model):
+	group = models.ForeignKey(Group, on_delete=models.PROTECT)
+	event = models.ForeignKey(Event, on_delete=models.PROTECT)
+	hosting = models.BooleanField(default=False)

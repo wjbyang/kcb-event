@@ -1,5 +1,5 @@
 from rest_framework import serializers
-from .models.models import *
+from .models import *
 
 class UserSerializer(serializers.ModelSerializer):
 	# organization is a model and hence is not json serializable when we return it as response in our view

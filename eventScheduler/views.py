@@ -3,10 +3,10 @@ from django.core.serializers import serialize
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework import status
-from .models.models import *
+from .models import *
 from .serializers import *
-from .services import *
-from .utility import *
+from .utility.services import *
+from .utility.utility import *
 
 def index(request):
 	return HttpResponse("Hello, world")
@@ -52,7 +52,9 @@ class UserView(APIView):
 	def post(self, request, *args, **kwargs):
 		request_data = request.data
 		required_fields = ['first_name', 'last_name', 'email', 'organization_id']
-		check_if_fields_are_missing(request_data,required_fields)
+		error = check_if_fields_are_missing(request_data,required_fields)
+		if error: 
+			return Response({'error': error.message}, status=status.HTTP_400_BAD_REQUEST)
 		first_name = request_data.get('first_name')
 		last_name = request_data.get('last_name')
 		email = request_data.get('email')
@@ -80,7 +82,9 @@ class EventView(APIView):
 	def post(self, request, *args, **kwargs):
 		request_data = request.data
 		required_fields = ['name', 'location', 'description', 'start_time']
-		check_if_fields_are_missing(request_data,required_fields)
+		error = check_if_fields_are_missing(request_data,required_fields)
+		if error: 
+			return Response({'error': error.message}, status=status.HTTP_400_BAD_REQUEST)
 		name = request_data.get('name')
 		location = request_data.get('location')
 		description = request_data.get('description')

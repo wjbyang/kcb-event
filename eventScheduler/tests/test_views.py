@@ -2,7 +2,7 @@ from rest_framework.test import APITestCase, APIClient
 from rest_framework import status
 from unittest.mock import patch
 from django.utils import timezone
-from ..models.models import *
+from ..models import *
 from ..views import *
 
 class UserViewTest(APITestCase):

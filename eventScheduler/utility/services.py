@@ -1,5 +1,5 @@
-from .models.models import *
-from .serializers import *
+from ..models import *
+from ..serializers import *
 from rest_framework.exceptions import NotFound
 
 def get_organization_data(organization_id):
