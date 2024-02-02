@@ -1,5 +1,5 @@
 from unittest import TestCase
-from ..utility.utility import *
+from ...utility import *
 
 class CheckIfFieldsAreMissingTest(TestCase):
     def setUp(self):

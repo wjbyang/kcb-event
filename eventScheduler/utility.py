@@ -4,7 +4,3 @@ def check_if_fields_are_missing(data, required_fields):
         error_message = f"The following fields are missing or empty: {', '.join(missing_or_falsy_fields)}."
         return {'message': error_message}
     return None
-
-
-# 154.66, 23.46
-# 58.78, 23.29

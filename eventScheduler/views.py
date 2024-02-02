@@ -5,8 +5,8 @@ from rest_framework.response import Response
 from rest_framework import status
 from .models import *
 from .serializers import *
-from .utility.services import *
-from .utility.utility import *
+from .services import *
+from .utility import *
 
 def index(request):
 	return HttpResponse("Hello, world")
@@ -22,7 +22,10 @@ class OrganizationView(APIView):
 
 class ViewOrganization(APIView):
 	def get(self, request, *args, **kwargs):
-		return get_organization_data(kwargs['organization_id'])
+		organization_data = OrganizationService.get_organization_data(kwargs['organization_id'])
+		if organization_data is None:
+			return Response({'error': 'Organization not found.'}, status=status.HTTP_404_BAD_REQUEST)
+		return organization_data
 
 class ViewOrganizations(APIView):
 	def get(self, request, *args, **kwargs):
@@ -60,7 +63,9 @@ class UserView(APIView):
 		email = request_data.get('email')
 		organization_id = request_data.get('organization_id')
 		# if get_organization_data raises an exception, it will propagate up and terminate the post request
-		organization = get_organization_data(organization_id)
+		organization = OrganizationService.get_organization_object(organization_id)
+		if organization is None:
+			return Response({'error': 'Organization not found.'}, status=status.HTTP_404_BAD_REQUEST)
 		new_user = User(first_name=first_name, last_name=last_name, email=email, organization=organization)
 		new_user.save()
 		data = UserSerializer(new_user).data
