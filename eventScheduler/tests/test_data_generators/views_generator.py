@@ -1,5 +1,5 @@
 import uuid
-from datetime import datetime
+from django.utils import timezone
 
 class ViewData:
     def request_format(self):
@@ -35,5 +35,5 @@ class EventData(ViewData):
             'location': 'random-event-location',
             'description': 'random-event-description',
             'image': 'random-image-url',
-            'start_time': datetime.now().strftime("%m/%d/%Y, %H:%M:%S")
+            'start_time': timezone.now().strftime("%Y-%m-%d %H:%M:%S%z")
         }

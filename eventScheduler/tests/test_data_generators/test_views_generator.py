@@ -29,8 +29,3 @@ class TestViewDataClasses(unittest.TestCase):
         self.assertNotIn('image', missing_data)
         self.assertIn('guid', missing_data)
         self.assertIn('last_name', missing_data)
-
-# Additional tests for EventData can follow a similar structure, focusing on its unique attributes.
-
-if __name__ == '__main__':
-    unittest.main()
