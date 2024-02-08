@@ -1,2 +1,3 @@
 django
 rest_framework
+factory_boy

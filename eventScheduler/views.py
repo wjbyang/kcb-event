@@ -1,12 +1,9 @@
 from django.http import HttpResponse
-from django.core.serializers import serialize
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework import status
 from .models import *
 from .serializers import *
-from .services import *
-from .utility import *
 
 def index(request):
 	return HttpResponse("Hello, world")
@@ -22,10 +19,9 @@ class OrganizationView(APIView):
 
 class ViewOrganization(APIView):
 	def get(self, request, *args, **kwargs):
-		organization_data = OrganizationService.get_organization_data(kwargs['organization_id'])
-		if organization_data is None:
-			return Response({'error': 'Organization not found.'}, status=status.HTTP_404_BAD_REQUEST)
-		return organization_data
+		organization = Organization.objects.get(guid=self.kwargs['organization_id'])
+		data = OrganizationSerializer(organization).data
+		return HttpResponse(data, content_type="application/json")
 
 class ViewOrganizations(APIView):
 	def get(self, request, *args, **kwargs):
@@ -53,28 +49,17 @@ class GroupView(APIView):
 
 class UserView(APIView):
 	def post(self, request, *args, **kwargs):
-		request_data = request.data
-		required_fields = ['first_name', 'last_name', 'email', 'organization_id']
-		error = check_if_fields_are_missing(request_data,required_fields)
-		if error: 
-			return Response({'error': error.message}, status=status.HTTP_400_BAD_REQUEST)
-		first_name = request_data.get('first_name')
-		last_name = request_data.get('last_name')
-		email = request_data.get('email')
-		organization_id = request_data.get('organization_id')
-		# if get_organization_data raises an exception, it will propagate up and terminate the post request
-		organization = OrganizationService.get_organization_object(organization_id)
-		if organization is None:
-			return Response({'error': 'Organization not found.'}, status=status.HTTP_404_BAD_REQUEST)
-		new_user = User(first_name=first_name, last_name=last_name, email=email, organization=organization)
-		new_user.save()
-		data = UserSerializer(new_user).data
-		return Response(data)
+		new_user = UserSerializer(data=request.data)
+		if new_user.is_valid():
+			new_user.save()
+			return Response(new_user.validated_data, status=status.HTTP_201_CREATED)
+		else:
+			return Response(new_user.errors, status=status.HTTP_400_BAD_REQUEST)
 
 class ViewUser(APIView):
 	def get(self, request, *args, **kwargs):
 		user = User.objects.get(guid=self.kwargs['user_id'])
-		data = serialize("json", [user], fields=('first_name', 'last_name', 'organization'))
+		data = UserSerializer(user).data
 		return HttpResponse(data, content_type="application/json")
 
 class ViewUsers(APIView):
@@ -85,24 +70,16 @@ class ViewUsers(APIView):
 
 class EventView(APIView):
 	def post(self, request, *args, **kwargs):
-		request_data = request.data
-		required_fields = ['name', 'location', 'description', 'start_time']
-		error = check_if_fields_are_missing(request_data,required_fields)
-		if error: 
-			return Response({'error': error.message}, status=status.HTTP_400_BAD_REQUEST)
-		name = request_data.get('name')
-		location = request_data.get('location')
-		description = request_data.get('description')
-		image = request_data.get('image')
-		start_time = request.data.get('start_time')
-		new_event = Event(name=name, location=location, description=description, image=image, start_time=start_time)
-		new_event.save()
-		data = EventSerializer(new_event).data
-		return Response(data)
+		new_event = EventSerializer(data=request.data)
+		if new_event.is_valid():
+			new_event.save()
+			return Response(new_event.validated_data, status=status.HTTP_201_CREATED)
+		else:
+			return Response(new_event.errors, status=status.HTTP_400_BAD_REQUEST)
 
 class ViewEvent(APIView):
 	def get(self, request, *args, **kwargs):
-		event = User.objects.get(guid=self.kwargs['event_id'])
+		event = Event.objects.get(guid=self.kwargs['event_id'])
 		data = EventSerializer(event).data
 		return HttpResponse(data, content_type="application/json")
 

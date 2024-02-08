@@ -1,55 +1,87 @@
 from rest_framework.test import APITestCase, APIClient
 from rest_framework import status
 from unittest.mock import patch
-from django.utils import timezone
 from ...models import *
 from ...views import *
+from ..test_data_generators.views_generator import *
 
-class UserViewTest(APITestCase):
+class BaseViewTest(APITestCase):
     def setUp(self):
         self.client = APIClient()
-        self.post_url = '/eventScheduler/v1/user/post/'
-        self.organization = Organization.objects.create(name='random-organization-name')
-        self.valid_data = {
-            'first_name': 'random-valid-first-name',
-            'last_name': 'random-valid-last-name',
-            'email': 'random-valid-email',
-            'image': 'random-image',
-            'organization_id': self.organization.guid
+
+    def assert_post_status(self, post_url, mock_serializer, request_data, expected_status_code, expected_response_data):
+        response = self.client.post(post_url, request_data, format='json')
+        self.assertEqual(response.status_code, expected_status_code)
+        self.assertEqual(response.data, expected_response_data)
+        mock_serializer.assert_called_once_with(data=request_data)
+        mock_serializer.return_value.is_valid.assert_called_once()
+
+class UserViewTest(BaseViewTest):
+    def setUp(self):
+        self.client = APIClient()
+        self.post_url = '/eventScheduler/v1/user/'
+
+    @patch('eventScheduler.views.UserSerializer', **{ 
+        'return_value.is_valid.return_value': True,
+        'return_value.save.return_value': None
+    })
+    def test_post_user_success(self, mock_serializer):
+        expected_response_data = UserData().server_response_format()
+        expected_status_code = status.HTTP_201_CREATED
+        mock_serializer.return_value.validated_data = expected_response_data
+        request_data = UserData().request_format()
+        self.assert_post_status(self.post_url, mock_serializer, request_data, expected_status_code, expected_response_data)
+
+    @patch('eventScheduler.views.UserSerializer', **{ 
+        'return_value.is_valid.return_value': False,
+        'return_value.errors': {
+            'first_name': ['This field is required'], 
+            'email': ['This field is required.'],
+            'organization_id': ['This field is required.'],
         }
-
-    @patch('eventScheduler.views.OrganizationService.get_organization_data')
-    @patch('eventScheduler.views.UserSerializer')
-    def test_post_user_success(self, mock_serializer, mock_get_organization):
-        mock_user_data = self.valid_data.copy()
-        mock_serializer_instance = mock_serializer.return_value
-        mock_serializer_instance.data = mock_user_data
-        mock_get_organization.return_value = self.organization
-
-        response = self.client.post(self.post_url, self.valid_data, format='json')
-        self.assertEqual(response.status_code, status.HTTP_200_OK)
-        self.assertEqual(response.data, mock_user_data)
+    })
+    def test_post_user_fail(self, mock_serializer):
+        expected_response_data = {
+            'first_name': ['This field is required'], 
+            'email': ['This field is required.'],
+            'organization_id': ['This field is required.'],
+        }
+        expected_status_code = status.HTTP_400_BAD_REQUEST
+        request_data = UserData().missing('first_name','email','organization_id')
+        self.assert_post_status(self.post_url, mock_serializer, request_data, expected_status_code, expected_response_data)
     
-class EventViewTest(APITestCase):
+class EventViewTest(BaseViewTest):
     def setUp(self):
         self.client = APIClient()
-        self.post_url = '/eventScheduler/v1/event/post/'
-        self.valid_data = {
-            'name': 'random-valid-name',
-            'location': 'random-valid-location',
-            'description': 'random-valid-description',
-            'image': 'random-image',
-            'start_time': timezone.now()
+        self.post_url = '/eventScheduler/v1/event/'
+
+    @patch('eventScheduler.views.EventSerializer', **{ 
+        'return_value.is_valid.return_value': True,
+        'return_value.save.return_value': None
+    })
+    def test_post_event_success(self, mock_serializer):
+        expected_response_data = EventData().server_response_format()
+        expected_status_code = status.HTTP_201_CREATED
+        mock_serializer.return_value.validated_data = expected_response_data
+        request_data = EventData().request_format()
+        self.assert_post_status(self.post_url, mock_serializer, request_data, expected_status_code, expected_response_data)
+
+    @patch('eventScheduler.views.EventSerializer', **{ 
+        'return_value.is_valid.return_value': False,
+        'return_value.errors': {
+            'name': ['This field is required'], 
+            'location': ['This field is required.'],
+            'description': ['This field is required.'],
+            'start_time': ['This field is required.'],
         }
-
-    @patch('eventScheduler.views.check_if_fields_are_missing')
-    @patch('eventScheduler.views.EventSerializer')
-    def test_post_event_success(self, mock_serializer, mock_check_if_fields_are_missing):
-        mock_check_if_fields_are_missing.return_value = None
-        mock_event_data = self.valid_data.copy()
-        mock_serializer_instance = mock_serializer.return_value
-        mock_serializer_instance.data = mock_event_data
-
-        response = self.client.post(self.post_url, self.valid_data, format='json')
-        self.assertEqual(response.status_code, status.HTTP_200_OK)
-        self.assertEqual(response.data, mock_event_data)
+    })
+    def test_post_event_fail(self, mock_serializer):
+        expected_response_data = {
+            'name': ['This field is required'], 
+            'location': ['This field is required.'],
+            'description': ['This field is required.'],
+            'start_time': ['This field is required.'],
+        }
+        request_data = EventData().missing('name', 'location', 'description', 'start_time')
+        expected_status_code = status.HTTP_400_BAD_REQUEST
+        self.assert_post_status(self.post_url, mock_serializer, request_data, expected_status_code, expected_response_data)

@@ -2,12 +2,28 @@ from rest_framework import serializers
 from .models import *
 
 class UserSerializer(serializers.ModelSerializer):
-	# organization is a model and hence is not json serializable when we return it as response in our view
-	# as a result, we should turn it into json serializable format (in this case, primary key)
-	organization = serializers.PrimaryKeyRelatedField(read_only=True)
+	organization_id = serializers.UUIDField(write_only=True, required=True)
+	
 	class Meta:
 		model = User
-		fields = ['guid', 'first_name', 'last_name', 'email', 'image', 'organization']
+		fields = ['guid', 'first_name', 'last_name', 'email', 'image', 'organization_id']
+
+	def create(self, validated_data):
+		organization_id = validated_data.pop('organization_id')
+		if not organization_id:
+			raise serializers.ValidationError({'organization_id': 'This field is required.'})
+		try: 
+			organization = Organization.objects.get(guid=organization_id)
+		except Organization.DoesNotExist:
+			raise serializers.ValidationError({'organization_id': 'Invalid organization_id or Organization does not exist.'})
+		organization = Organization.objects.get(guid=organization_id)
+		validated_data['organization'] = organization
+		return super(UserSerializer, self).create(validated_data)
+
+	def to_representation(self, instance):
+		representation = super(UserSerializer, self).to_representation(instance)
+		representation['organization_id'] = str(instance.organization.guid) if instance.organization else None
+		return representation
 
 class OrganizationSerializer(serializers.ModelSerializer):
 	class Meta:

@@ -4,23 +4,23 @@ import uuid
 # KCB
 class Organization(models.Model):
 	guid = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False, unique=True)
-	name = models.CharField(max_length=100)
+	name = models.CharField(max_length=100, unique=True)
 	image = models.TextField(null=True, blank=True)
 
 # YA1, YA2, etc
 class Group(models.Model):
 	guid = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False, unique=True)
-	name = models.CharField(max_length=100)
+	name = models.CharField(max_length=100, unique=True)
 
 class User(models.Model):
 	guid = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False, unique=True)
 	first_name = models.CharField(max_length=50)
 	last_name = models.CharField(max_length=50)
-	email = models.EmailField()
+	email = models.EmailField(unique=True)
 	image = models.TextField(null=True, blank=True)
 	deleted = models.BooleanField(default=False)
 	isAdmin = models.BooleanField(default=False)
-	organization = models.ForeignKey(Organization, blank=True, null=True, on_delete=models.PROTECT)
+	organization = models.ForeignKey(Organization, blank=True, on_delete=models.PROTECT)
 
 class Event(models.Model):
 	guid = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False, unique=True)
