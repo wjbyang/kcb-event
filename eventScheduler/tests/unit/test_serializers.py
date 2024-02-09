@@ -79,13 +79,7 @@ class EventSerializerTest(BaseSerializerTest):
     def setUp(self):
         self.model = Event
         self.serializer = EventSerializer
-        self.data = {
-            'name': 'random-event-name',
-            'location': 'random-event-location',
-            'description': 'random-event-description',
-            'image': 'random-image-url',
-            'start_time': timezone.now().strftime("%Y-%m-%d %H:%M:%S%z")
-        } 
+        self.data = EventData(current_time=True).request_format()
 
     def test_serialization(self):
         self.assert_serialization_success(self.data, self.model, self.serializer)

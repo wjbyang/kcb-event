@@ -1,5 +1,5 @@
 from django.conf import settings
-from django.http import HttpResponseNotFound
+from django.http import JsonResponse
 
 class IncorrectUrlMiddleware:
     def __init__(self, get_response):
@@ -9,9 +9,9 @@ class IncorrectUrlMiddleware:
         response = self.get_response(request)
         # request.resolver_match exists after a valid URL has been called
         if response.status_code == 404 and not request.resolver_match:
-            return HttpResponseNotFound('Hey, did you just make an API request to the backend? Well, I have bad news for you. The url you used to make an API request didn\'t hit any routes in our server. \
+            return JsonResponse({'Hey, did you just make an API request to the backend? Well, I have bad news for you. The url you used to make an API request didn\'t hit any routes in our server. \
 Maybe you missed some "/" placements in the url. Ex. you typed "/requests" instead of "/reqests/". Maybe you got the server IP wrong. Maybe you misspelled something. Or maybe it\'s some different issue. \
 Whatever it is, if you are seeing this message, the issue is *most likely* in the url you used to make that API call. This middleware was personally made \
 by a member of the backend development team in order to deal with 404 issues that stem from lack of matching URL and not from other 404 issues. Do note that this API does not use plural noun convention, \
-so POST or GET methods that deal with singular resources will use singular noun ex. "user" instead of "users", whereas plural resources will use plural noun. Regardless of whatever the issue is, happy debugging, my friend.')
+so POST or GET methods that deal with singular resources will use singular noun ex. "user" instead of "users", whereas plural resources will use plural noun. Regardless of whatever the issue is, happy debugging, my friend.'})
         return response
