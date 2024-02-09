@@ -40,7 +40,7 @@ class BaseSerializerTest(TestCase):
             self.assertTrue(invalid_serialized_data.errors)
 
         # Below, we create a user, and then try to create another user with exactly the same fields. We want to test all cases where a new user is created with exactly one unique field as a duplicate.
-        # The above is done by adding a string '1' to all unique fields except one. This way we are testing one unique field at a time. 
+        # The above is done by adding a string '1' to all unique fields (added at the start, since else emails will break) except one. This way we are testing one unique field at a time. 
         # It is trivial to know from the above that we can only test unique fields that are in string format and that we cannot test other data types of unique fields with this logic.
         # The provided fields should, in general, not include anything that will break if we add '1' to it, just like a uuid. 'uuid' is emphasized only to provide an easy example.
         Model.objects.create(**data)
@@ -48,7 +48,7 @@ class BaseSerializerTest(TestCase):
             data_with_existing_unique_field = deepcopy(data)
             for j, field in enumerate(unique_non_uuid_string_fields):
                 if i != j:
-                    data_with_existing_unique_field[field] += '1'
+                    data_with_existing_unique_field[field] = '1' + data_with_existing_unique_field[field]
             serialized_object = Serializer(data=data_with_existing_unique_field)
             self.assertFalse(serialized_object.is_valid())
 
