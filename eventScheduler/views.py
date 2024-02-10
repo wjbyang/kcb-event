@@ -25,23 +25,20 @@ class ViewOrganizations(APIView):
 		orgs = Organization.objects.all()
 		data = OrganizationSerializer(orgs, many=True).data
 		return Response(data, content_type='application/json')
+	
+class GroupView(APIView):
+	def post(self, request, *args, **kwargs):
+		new_group = GroupSerializer(data=request.data)
+		if new_group.is_valid():
+			new_group.save()
+			return Response(new_group.data, status=status.HTTP_201_CREATED)
+		else:
+			return Response(new_group.errors, status=status.HTTP_400_BAD_REQUEST, content_type='application/json')
 
 class ViewGroups(APIView):
 	def get(self, request, *args, **kwargs):
 		orgs = Group.objects.all()
 		data = GroupSerializer(orgs, many=True).data
-		return Response(data, content_type='application/json')
-
-class GroupView(APIView):
-	def post(self, request, *args, **kwargs):
-		request = request.data
-		name = request.get('name')
-		existingGroup = Group.objects.filter(name=name)
-		if existingGroup:
-			return Response('Group already exists')
-		newGroup = Group(name=name)
-		newGroup.save()
-		data = GroupSerializer(newGroup).data
 		return Response(data, content_type='application/json')
 
 class UserView(APIView):
@@ -110,3 +107,22 @@ class ViewEvents(APIView):
 		events = Event.objects.all()
 		data = EventSerializer(events, many=True).data
 		return Response(data, content_type='application/json')
+
+class UpdateEvent(APIView):
+	def put(self, request, *args, **kwargs):
+		event = Event.objects.get(guid=self.kwargs['event_id'])
+		updated_event = EventSerializer(event, data=request.data)
+		if updated_event.is_valid():
+			updated_event.save()
+			return Response(updated_event.data, content_type='application/json')
+		else:
+			return Response(updated_event.errors, status=status.HTTP_400_BAD_REQUEST, content_type='application/json')
+	
+class DeleteEvent(APIView):
+	def delete(self, request, *args, **kwargs):
+		try:
+			event = Event.objects.get(guid=self.kwargs['event_id'])
+		except Event.DoesNotExist:
+			return Response({"errors": {"detail": "Event not found"}}, status=status.HTTP_404_NOT_FOUND, content_type='application/json')
+		event.delete()
+		return Response(status=status.HTTP_204_NO_CONTENT)
