@@ -67,7 +67,10 @@ class ViewUsers(APIView):
 
 class UpdateUser(APIView):
 	def put(self, request, *args, **kwargs):
-		user = User.objects.get(guid=self.kwargs['user_id'])
+		try:
+			user = User.objects.get(guid=self.kwargs['user_id'])
+		except User.DoesNotExist:
+			return Response({"errors": {"detail": "User not found"}}, status=status.HTTP_404_NOT_FOUND, content_type='application/json')
 		updated_user = UserSerializer(user, data=request.data)
 		if updated_user.is_valid():
 			updated_user.save()
@@ -110,7 +113,10 @@ class ViewEvents(APIView):
 
 class UpdateEvent(APIView):
 	def put(self, request, *args, **kwargs):
-		event = Event.objects.get(guid=self.kwargs['event_id'])
+		try:
+			event = Event.objects.get(guid=self.kwargs['event_id'])
+		except Event.DoesNotExist:
+			return Response({"errors": {"detail": "Event not found"}}, status=status.HTTP_404_NOT_FOUND, content_type='application/json')
 		updated_event = EventSerializer(event, data=request.data)
 		if updated_event.is_valid():
 			updated_event.save()
