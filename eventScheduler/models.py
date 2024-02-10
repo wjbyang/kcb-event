@@ -11,7 +11,7 @@ class Organization(models.Model):
 class Group(models.Model):
 	guid = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False, unique=True)
 	name = models.CharField(max_length=100, unique=True)
-	# add organization
+	organization = models.ForeignKey(Organization, blank=True, on_delete=models.PROTECT)
 
 class User(models.Model):
 	guid = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False, unique=True)
@@ -21,20 +21,20 @@ class User(models.Model):
 	image = models.TextField(null=True, blank=True)
 	deleted = models.BooleanField(default=False)
 	isAdmin = models.BooleanField(default=False)
-	# add group
+	group = models.ForeignKey(Group, blank=True, on_delete=models.PROTECT)
 	organization = models.ForeignKey(Organization, blank=True, on_delete=models.PROTECT)
 
 class Event(models.Model):
 	guid = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False, unique=True)
 	name = models.TextField()
 	location = models.CharField(max_length=50)
-	# add organization
 	description = models.TextField()
 	image = models.TextField(null=True, blank=True)
 	start_time = models.DateTimeField()
 	created = models.DateTimeField(auto_now_add=True, editable=False)
 	modified = models.DateTimeField(null=True, blank=True)
 	deleted = models.BooleanField(default=False)
+	organization = models.ForeignKey(Organization, blank=True, on_delete=models.PROTECT)
 
 # relational models
 	
