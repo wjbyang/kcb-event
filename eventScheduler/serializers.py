@@ -2,9 +2,10 @@ from rest_framework import serializers
 from .models import *
 
 def validate_model_id(model, id, message):
-    if not model.objects.filter(pk=id).exists():
-        raise serializers.ValidationError(message)
-    return id
+	if not model.objects.filter(pk=id).exists():
+		print("WTF")
+		raise serializers.ValidationError(message)
+	return id
 
 class UserSerializer(serializers.ModelSerializer):
 	class Meta:
