@@ -1,41 +1,72 @@
 from rest_framework import serializers
 from .models import *
 
+def validate_model_id(model, id, message):
+    if not model.objects.filter(pk=id).exists():
+        raise serializers.ValidationError(message)
+    return id
+
 class UserSerializer(serializers.ModelSerializer):
-	organization_id = serializers.UUIDField(write_only=True, required=True)
-	
 	class Meta:
 		model = User
-		fields = ['guid', 'first_name', 'last_name', 'email', 'image', 'organization_id']
+		fields = '__all__'
 
-	def create(self, validated_data):
-		organization_id = validated_data.pop('organization_id')
-		if not organization_id:
-			raise serializers.ValidationError({'organization_id': 'This field is required.'})
-		try: 
-			organization = Organization.objects.get(guid=organization_id)
-		except Organization.DoesNotExist:
-			raise serializers.ValidationError({'organization_id': 'Invalid organization_id or Organization does not exist.'})
-		organization = Organization.objects.get(guid=organization_id)
-		validated_data['organization'] = organization
-		return super(UserSerializer, self).create(validated_data)
-
-	def to_representation(self, instance):
-		representation = super(UserSerializer, self).to_representation(instance)
-		representation['organization_id'] = str(instance.organization.guid) if instance.organization else None
-		return representation
+	def validate_group_id(self, value):
+		message = "group_id does not correspond to a valid group instance."
+		return validate_model_id(Group, value, message)
+	
+	def validate_organization_id(self, value):
+		message = "organization_id does not correspond to a valid organization instance."
+		return validate_model_id(Organization, value, message)
 
 class OrganizationSerializer(serializers.ModelSerializer):
 	class Meta:
 		model = Organization
-		fields = ['guid', 'name', 'image']
+		fields = '__all__'
 
 class GroupSerializer(serializers.ModelSerializer):
 	class Meta:
 		model = Group
-		fields = ['guid', 'name']
+		fields = '__all__'
+
+	def validate_organization_id(self, value):
+		message = "organization_id does not correspond to a valid organization instance."
+		return validate_model_id(Organization, value, message)
 
 class EventSerializer(serializers.ModelSerializer):
 	class Meta:
 		model = Event
-		fields = ['guid', 'name', 'location', 'description', 'image', 'start_time']
+		fields = '__all__'
+	
+	def validate_organization_id(self, value):
+		message = "organization_id does not correspond to a valid organization instance."
+		return validate_model_id(Organization, value, message)
+
+class UserToEventSerializer(serializers.ModelSerializer):
+	class Meta:
+		model = UserToEvent
+		fields = '__all__'
+
+	def validate_user_id(self, value):
+		message = "user_id does not correspond to a valid user instance."
+		return validate_model_id(User, value, message)
+	
+	def validate_event_id(self, value):
+		message = "event_id does not correspond to a valid event instance."
+		return validate_model_id(Event, value, message)
+	
+	def create(self, validated_data):
+		print()
+
+class GroupToEventSerializer(serializers.ModelSerializer):
+	class Meta:
+		model = GroupToEvent
+		fields = '__all__'
+
+	def validate_group_id(self, value):
+		message = "group_id does not correspond to a valid group instance."
+		return validate_model_id(Group, value, message)
+	
+	def validate_event_id(self, value):
+		message = "event_id does not correspond to a valid event instance."
+		return validate_model_id(Event, value, message)

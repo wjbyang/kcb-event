@@ -12,7 +12,7 @@ class OrganizationView(APIView):
 		new_organization = Organization(name=name)
 		new_organization.save()
 		data = OrganizationSerializer(new_organization).data
-		return Response(data, content_type='application/json')
+		return Response(data, status=status.HTTP_201_CREATED, content_type='application/json')
 
 class ViewOrganization(APIView):
 	def get(self, request, *args, **kwargs):
@@ -132,3 +132,17 @@ class DeleteEvent(APIView):
 			return Response({"errors": {"detail": "Event not found"}}, status=status.HTTP_404_NOT_FOUND, content_type='application/json')
 		event.delete()
 		return Response(status=status.HTTP_204_NO_CONTENT)
+
+# class EventAttending(APIView):
+# 	def post(self, request, *args, **kwargs):
+# 		try:
+# 			user_id = request.data['user_id']
+# 			event_id = request.data['event_id']
+# 			user_to_event = UserToEvent.objects.get(user_id)
+# 		except Event.DoesNotExist:
+# 		new_user_to_event = UserToEventSerializer(data=request.data)
+# 		if new_user_to_event.is_valid():
+# 			new_user_to_event.save()
+# 			return Response(new_user_to_event.data, content_type='application/json')
+# 		else:
+# 			return Response(new_user_to_event.errors, status=status.HTTP_400_BAD_REQUEST, content_type='application/json')

@@ -6,12 +6,14 @@ class IncorrectUrlMiddleware:
         self.get_response = get_response
 
     def __call__(self, request):
-        response = self.get_response(request)
-        # request.resolver_match exists after a valid URL has been called
-        if response.status_code == 404 and not request.resolver_match:
-            return JsonResponse({'Hey, did you just make an API request to the backend? Well, I have bad news for you. The url you used to make an API request didn\'t hit any routes in our server. \
-Maybe you missed some "/" placements in the url. Ex. you typed "/requests" instead of "/reqests/". Maybe you got the server IP wrong. Maybe you misspelled something. Or maybe it\'s some different issue. \
-Whatever it is, if you are seeing this message, the issue is *most likely* in the url you used to make that API call. This middleware was personally made \
-by a member of the backend development team in order to deal with 404 issues that stem from lack of matching URL and not from other 404 issues. Do note that this API does not use plural noun convention, \
-so POST or GET methods that deal with singular resources will use singular noun ex. "user" instead of "users", whereas plural resources will use plural noun. Regardless of whatever the issue is, happy debugging, my friend.'})
-        return response
+        try:
+            response = self.get_response(request)
+            # Handle incorrect URL 404 responses
+            if response.status_code == 404 and not request.resolver_match:
+                return JsonResponse({
+                    'error': 'The url you provided did not match any of the existing API endpoints. You either typed the url wrong, or your kwarg was null. The urls for this API does not always use plural nouns and does not have trailing slashes.'
+                })
+            return response
+        except Exception as e:
+            # Here you can add more sophisticated exception handling and logging
+            return JsonResponse({'error': 'An unexpected server error occurred.'}, status=500)
