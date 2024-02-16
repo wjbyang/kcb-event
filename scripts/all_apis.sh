@@ -51,9 +51,10 @@ else
 fi
 
 if kill -0 $SERVER_PID > /dev/null 2>&1; then
-    echo "\nKilling server process $SERVER_PID."
+    echo "\n\nKilling server process $SERVER_PID."
     kill $SERVER_PID
 else
-    echo "\nServer process $SERVER_PID not found or already terminated."
+    echo "\n\nServer process $SERVER_PID not found or already terminated."
 fi
-# lsof -ti:5678 | xargs kill -9
+lsof -ti:5678 | xargs kill -9
+lsof -ti:8000 | xargs kill -9
