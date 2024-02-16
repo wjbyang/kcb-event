@@ -3,13 +3,12 @@ scripts/migrate.sh &> /dev/null
 echo "...done."
 if [ "$2" = "debug" ]; then
     python -m debugpy --listen 127.0.0.1:5678 --wait-for-client manage.py runserver &
-    SERVER_PID=$!
     sleep 3
 else
     python manage.py runserver &> /dev/null & 
-    SERVER_PID=$!
     sleep 0.5
 fi
+SERVER_PID=$!
 
 # organization
 if [[ -z "$1" || "$1" == "organization" || "$1" == "all" ]]; then
@@ -57,4 +56,4 @@ if kill -0 $SERVER_PID > /dev/null 2>&1; then
 else
     echo "\nServer process $SERVER_PID not found or already terminated."
 fi
-lsof -ti:5678 | xargs kill -9
+# lsof -ti:5678 | xargs kill -9
