@@ -127,16 +127,6 @@ class DeleteEvent(BaseView):
 		event.delete()
 		return Response(status=status.HTTP_204_NO_CONTENT)
 
-# class EventAttending(APIView):
-# 	def post(self, request, *args, **kwargs):
-# 		try:
-# 			user_id = request.data['user_id']
-# 			event_id = request.data['event_id']
-# 			user_to_event = UserToEvent.objects.get(user_id)
-# 		except Event.DoesNotExist:
-# 		new_user_to_event = UserToEventSerializer(data=request.data)
-# 		if new_user_to_event.is_valid():
-# 			new_user_to_event.save()
-# 			return Response(new_user_to_event.data, content_type='application/json')
-# 		else:
-# 			return Response(new_user_to_event.errors, status=status.HTTP_400_BAD_REQUEST, content_type='application/json')
+class EventAttending(BaseView):
+	def post(self, request, *args, **kwargs):
+		return self.post_data(data=request.data, Serializer=UserToEventSerializer)

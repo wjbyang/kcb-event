@@ -18,4 +18,5 @@ urlpatterns = [
     path('v1/events', views.ViewEvents.as_view(), name='event_get_all'),
     path('v1/event/update/<str:event_id>', views.UpdateEvent.as_view(), name='event_update'),
     path('v1/event/delete/<str:event_id>', views.DeleteEvent.as_view(), name='event_delete'),
+    path('v1/eventattending', views.EventAttending.as_view(), name='eventattending_post'),
 ]

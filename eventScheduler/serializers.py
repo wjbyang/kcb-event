@@ -3,7 +3,6 @@ from .models import *
 
 def validate_model_id(model, id, message):
 	if not model.objects.filter(pk=id).exists():
-		print("WTF")
 		raise serializers.ValidationError(message)
 	return id
 
@@ -55,9 +54,17 @@ class UserToEventSerializer(serializers.ModelSerializer):
 	def validate_event_id(self, value):
 		message = "event_id does not correspond to a valid event instance."
 		return validate_model_id(Event, value, message)
-	
+
 	def create(self, validated_data):
-		print()
+		user_id = validated_data.get('user_id')
+		event_id = validated_data.get('event_id')
+		attending = validated_data.get('attending')
+		user_to_event_instance, created = UserToEvent.objects.update_or_create(
+			user_id=user_id, 
+			event_id=event_id,
+			defaults={'attending': attending}
+		)
+		return user_to_event_instance
 
 class GroupToEventSerializer(serializers.ModelSerializer):
 	class Meta:
