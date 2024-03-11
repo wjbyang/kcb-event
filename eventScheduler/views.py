@@ -1,9 +1,9 @@
-from django.http import HttpResponse
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework import status
 from .models import *
 from .serializers import *
+from .utils.response_handlers import *
 
 class KcbResponse(Response):
 	def __init__(self, *args, **kwargs):
@@ -12,67 +12,73 @@ class KcbResponse(Response):
 		kwargs["data"] = {"message": self.message, "results": self.results}
 		super().__init__(*args, **kwargs)
 
-class OrganizationView(APIView):
-	def post(self, request, *args, **kwargs):
-		request = request.data
-		name = request.get('name')
-		new_organization = Organization(name=name)
-		new_organization.save()
-		data = OrganizationSerializer(new_organization).data
-		return Response(data, content_type='application/json')
-
-class ViewOrganization(APIView):
-	def get(self, request, *args, **kwargs):
-		organization = Organization.objects.get(guid=self.kwargs['organization_id'])
-		data = OrganizationSerializer(organization).data
-		return Response(data, content_type='application/json')
-
-class ViewOrganizations(APIView):
-	def get(self, request, *args, **kwargs):
-		orgs = Organization.objects.all()
-		data = OrganizationSerializer(orgs, many=True).data
-		return Response(data, content_type='application/json')
-	
-class GroupView(APIView):
-	def post(self, request, *args, **kwargs):
-		new_group = GroupSerializer(data=request.data)
-		if new_group.is_valid():
-			new_group.save()
-			return Response(new_group.data, status=status.HTTP_201_CREATED)
-		else:
-			return Response(new_group.errors, status=status.HTTP_400_BAD_REQUEST, content_type='application/json')
-
-class ViewGroups(APIView):
-	def get(self, request, *args, **kwargs):
-		orgs = Group.objects.all()
-		data = GroupSerializer(orgs, many=True).data
-		return Response(data, content_type='application/json')
-
-class UserView(APIView):
-	def post(self, request, *args, **kwargs):
-		new_user = UserSerializer(data=request.data)
-		if new_user.is_valid():
-			new_user.save()
-			return Response(new_user.data, status=status.HTTP_201_CREATED)
-		else:
-			return Response(new_user.errors, status=status.HTTP_400_BAD_REQUEST, content_type='application/json')
-
-class ViewUser(APIView):
-	def get(self, request, *args, **kwargs):
+class BaseView(APIView):
+	def post_data(self, data, Serializer):
 		try:
-			user = User.objects.get(guid=self.kwargs['user_id'])
-		except User.DoesNotExist:
-			return Response({"errors": {"detail": "User not found"}}, status=status.HTTP_404_NOT_FOUND, content_type='application/json')
-		data = UserSerializer(user).data
-		return Response(data, content_type='application/json')
+			serializer = Serializer(data=data)
+			if not serializer.is_valid():
+				return ErrorResponseHandler.handle(message=str(serializer.errors), status_code=status.HTTP_400_BAD_REQUEST)
+			serializer.save()
+			return SuccessResponseHandler.handle(data=serializer.data, status_code=status.HTTP_201_CREATED)
+		except Exception as e:
+			return ErrorResponseHandler.handle(message=str(e), status_code=status.HTTP_500_INTERNAL_SERVER_ERROR)
+	
+	def get_object(self, guid, Model, Serializer, name):
+		try:
+			object = Model.objects.get(guid=guid)
+			data = Serializer(object).data
+		except Model.DoesNotExist:
+			return ErrorResponseHandler.handle(message=f"{name} not found.", status_code=status.HTTP_400_BAD_REQUEST)
+		except Exception as e:
+			return ErrorResponseHandler.handle(message=str(e), status_code=status.HTTP_500_INTERNAL_SERVER_ERROR)
+		return SuccessResponseHandler.handle(data=data, status_code=status.HTTP_200_OK)
+	
+	def get_objects(self, Model, Serializer):
+		try:
+			objects = Model.objects.all()
+			data = Serializer(objects, many=True).data
+			status_code=status.HTTP_200_OK
+			return SuccessResponseHandler.handle(data, status_code)
+		except Exception as e:
+			return ErrorResponseHandler.handle(message=str(e), status_code=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
-class ViewUsers(APIView):
+class OrganizationView(BaseView):
+	def post(self, request, *args, **kwargs):
+		return self.post_data(data=request.data, Serializer=OrganizationSerializer)
+
+class ViewOrganization(BaseView):
 	def get(self, request, *args, **kwargs):
-		users = User.objects.all()
-		data = UserSerializer(users, many=True).data
-		return Response(data, content_type='application/json')
+		return self.get_object(guid=self.kwargs['organization_id'], Model=Organization, Serializer=OrganizationSerializer, name="Organization")
 
-class UpdateUser(APIView):
+class ViewOrganizations(BaseView):
+	def get(self, request, *args, **kwargs):
+		return self.get_objects(Model=Organization, Serializer=OrganizationSerializer)
+	
+class GroupView(BaseView):
+	def post(self, request, *args, **kwargs):
+		return self.post_data(data=request.data, Serializer=GroupSerializer)
+
+class ViewGroup(BaseView):
+	def get(self, request, *args, **kwargs):
+		return self.get_object(guid=self.kwargs['group_id'], Model=Group, Serializer=GroupSerializer, name="Group")
+
+class ViewGroups(BaseView):
+	def get(self, request, *args, **kwargs):
+		return self.get_objects(Model=Group, Serializer=GroupSerializer)
+
+class UserView(BaseView):
+	def post(self, request, *args, **kwargs):
+		return self.post_data(data=request.data, Serializer=UserSerializer)
+
+class ViewUser(BaseView):
+	def get(self, request, *args, **kwargs):
+		return self.get_object(guid=self.kwargs['user_id'], Model=User, Serializer=UserSerializer, name="User")
+
+class ViewUsers(BaseView):
+	def get(self, request, *args, **kwargs):
+		return self.get_objects(Model=User, Serializer=UserSerializer)
+
+class UpdateUser(BaseView):
 	def put(self, request, *args, **kwargs):
 		try:
 			user = User.objects.get(guid=self.kwargs['user_id'])
@@ -85,7 +91,7 @@ class UpdateUser(APIView):
 		else:
 			return Response(updated_user.errors, status=status.HTTP_400_BAD_REQUEST, content_type='application/json')
 	
-class DeleteUser(APIView):
+class DeleteUser(BaseView):
 	def delete(self, request, *args, **kwargs):
 		try:
 			user = User.objects.get(guid=self.kwargs['user_id'])
@@ -94,31 +100,19 @@ class DeleteUser(APIView):
 		user.delete()
 		return Response(status=status.HTTP_204_NO_CONTENT)
 
-class EventView(APIView):
+class EventView(BaseView):
 	def post(self, request, *args, **kwargs):
-		new_event = EventSerializer(data=request.data)
-		if new_event.is_valid():
-			new_event.save()
-			return Response(new_event.data, status=status.HTTP_201_CREATED, content_type='application/json')
-		else:
-			return Response(new_event.errors, status=status.HTTP_400_BAD_REQUEST, content_type='application/json')
+		return self.post_data(data=request.data, Serializer=EventSerializer)
 
-class ViewEvent(APIView):
+class ViewEvent(BaseView):
 	def get(self, request, *args, **kwargs):
-		try:
-			event = Event.objects.get(guid=self.kwargs['event_id'])
-		except Event.DoesNotExist:
-			return Response({"errors": {"detail": "Event not found"}}, status=status.HTTP_404_NOT_FOUND, content_type='application/json')
-		data = EventSerializer(event).data
-		return Response(data, content_type='application/json')
+		return self.get_object(guid=self.kwargs['event_id'], Model=Event, Serializer=EventSerializer, name="Event")
 
-class ViewEvents(APIView):
+class ViewEvents(BaseView):
 	def get(self, request, *args, **kwargs):
-		events = Event.objects.all()
-		data = EventSerializer(events, many=True).data
-		return Response(data, content_type='application/json')
+		return self.get_objects(Model=Event, Serializer=EventSerializer)
 
-class UpdateEvent(APIView):
+class UpdateEvent(BaseView):
 	def put(self, request, *args, **kwargs):
 		try:
 			event = Event.objects.get(guid=self.kwargs['event_id'])
@@ -131,7 +125,7 @@ class UpdateEvent(APIView):
 		else:
 			return Response(updated_event.errors, status=status.HTTP_400_BAD_REQUEST, content_type='application/json')
 	
-class DeleteEvent(APIView):
+class DeleteEvent(BaseView):
 	def delete(self, request, *args, **kwargs):
 		try:
 			event = Event.objects.get(guid=self.kwargs['event_id'])
@@ -139,3 +133,7 @@ class DeleteEvent(APIView):
 			return Response({"errors": {"detail": "Event not found"}}, status=status.HTTP_404_NOT_FOUND, content_type='application/json')
 		event.delete()
 		return Response(status=status.HTTP_204_NO_CONTENT)
+
+class EventAttending(BaseView):
+	def post(self, request, *args, **kwargs):
+		return self.post_data(data=request.data, Serializer=UserToEventSerializer)

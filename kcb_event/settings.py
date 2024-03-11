@@ -16,7 +16,6 @@ import sys
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 
-
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/4.0/howto/deployment/checklist/
 
@@ -26,7 +25,7 @@ SECRET_KEY = 'django-insecure-6tnr!oj2q7hra0)v$6l=%4%d7r=&f-@#z+++%95#o(@(tlgqqn
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ['*']
 
 # Application definition
 
@@ -101,6 +100,12 @@ AUTH_PASSWORD_VALIDATORS = [
     },
 ]
 
+# We aren't serving html from the backend. We have an entire frontend part for that.
+# So we will use rest framework's exception handler so that we get some json response.
+
+REST_FRAMEWORK = {
+    'EXCEPTION_HANDLER': 'rest_framework.views.exception_handler',
+}
 
 # Internationalization
 # https://docs.djangoproject.com/en/4.0/topics/i18n/
