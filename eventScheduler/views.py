@@ -5,6 +5,13 @@ from rest_framework import status
 from .models import *
 from .serializers import *
 
+class KcbResponse(Response):
+	def __init__(self, *args, **kwargs):
+		self.message = kwargs.pop("message") if "message" in kwargs.keys() else ""
+		self.results = kwargs.pop("results") if "results" in kwargs.keys() else []
+		kwargs["data"] = {"message": self.message, "results": self.results}
+		super().__init__(*args, **kwargs)
+
 class OrganizationView(APIView):
 	def post(self, request, *args, **kwargs):
 		request = request.data

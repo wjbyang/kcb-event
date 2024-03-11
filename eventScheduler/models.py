@@ -21,7 +21,7 @@ class User(models.Model):
 	image = models.TextField(null=True, blank=True)
 	deleted = models.BooleanField(default=False)
 	isAdmin = models.BooleanField(default=False)
-	# add group
+	group = models.ForeignKey(Group, blank=True, on_delete=models.PROTECT)
 	organization = models.ForeignKey(Organization, blank=True, on_delete=models.PROTECT)
 
 class Event(models.Model):
