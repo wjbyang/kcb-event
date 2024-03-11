@@ -35,6 +35,7 @@ class Event(models.Model):
     created = models.DateTimeField(auto_now_add=True, editable=False)
     modified = models.DateTimeField(null=True, blank=True)
     deleted = models.BooleanField(default=False)
+    attendingCount = models.PositiveIntegerField(default=0)
     organization_id = models.ForeignKey(Organization, on_delete=models.PROTECT)
 
 # relational models

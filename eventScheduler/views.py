@@ -5,6 +5,13 @@ from .models import *
 from .serializers import *
 from .utils.response_handlers import *
 
+class KcbResponse(Response):
+	def __init__(self, *args, **kwargs):
+		self.message = kwargs.pop("message") if "message" in kwargs.keys() else ""
+		self.results = kwargs.pop("results") if "results" in kwargs.keys() else []
+		kwargs["data"] = {"message": self.message, "results": self.results}
+		super().__init__(*args, **kwargs)
+
 class BaseView(APIView):
 	def post_data(self, data, Serializer):
 		try:
